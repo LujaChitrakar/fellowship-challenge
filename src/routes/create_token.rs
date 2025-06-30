@@ -1,6 +1,6 @@
-use axum::{Json, Router, routing::post};
+use axum::{response::IntoResponse, routing::post, Json, Router};
 use std::str::FromStr;
-
+use crate::handlers::common::*;
 use base64::{Engine as _, engine::general_purpose};
 use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
@@ -34,7 +34,7 @@ pub struct CreateMintResponse {
     data: InstructionData,
 }
 
-pub async fn create_token(Json(body): Json<CreateMintRequest>) -> Json<CreateMintResponse> {
+pub async fn create_token(Json(body): Json<CreateMintRequest>) -> impl IntoResponse{
     // Parse pubkeys
     let mint_pubkey = Pubkey::from_str(&body.mint).unwrap();
 
@@ -49,7 +49,7 @@ pub async fn create_token(Json(body): Json<CreateMintRequest>) -> Json<CreateMin
     )
     .unwrap();
 
-    let response = CreateMintResponse {
+    let response = SuccessResponse {
         success: true,
         data: InstructionData {
             program_id: ix.program_id.to_string(),

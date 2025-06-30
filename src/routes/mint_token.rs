@@ -1,3 +1,4 @@
+use axum::response::IntoResponse;
 use axum::{Json, Router, routing::post};
 use base64::{Engine as _, engine::general_purpose};
 use serde::{Deserialize, Serialize};
@@ -5,6 +6,8 @@ use solana_sdk::pubkey::Pubkey;
 use spl_token::{ID as TOKEN_PROGRAM_ID, instruction::mint_to};
 use std::net::SocketAddr;
 use std::str::FromStr;
+
+use crate::handlers::common::*;
 
 #[derive(Deserialize)]
 pub struct MintToRequest {
@@ -34,7 +37,7 @@ pub struct MintToResponse {
     data: InstructionData,
 }
 
-pub async fn mint_token(Json(body): Json<MintToRequest>) -> Json<MintToResponse> {
+pub async fn mint_token(Json(body): Json<MintToRequest>) -> impl IntoResponse {
     let mint = Pubkey::from_str(&body.mint).unwrap();
     let destination = Pubkey::from_str(&body.destination).unwrap();
     let authority = Pubkey::from_str(&body.authority).unwrap();
@@ -49,7 +52,7 @@ pub async fn mint_token(Json(body): Json<MintToRequest>) -> Json<MintToResponse>
     )
     .unwrap();
 
-    let response = MintToResponse {
+    let response = SuccessResponse {
         success: true,
         data: InstructionData {
             program_id: ix.program_id.to_string(),
